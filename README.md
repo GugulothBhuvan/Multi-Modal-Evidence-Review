@@ -8,25 +8,25 @@ This system processes textual user claims alongside visual evidence (images) to 
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
-- [📖 Project Overview & Problem Statement](#-project-overview--problem-statement)
-- [🏗️ System Architecture](#️-system-architecture)
+- [Project Overview & Problem Statement](#project-overview--problem-statement)
+- [System Architecture](#system-architecture)
   - [1. The Orchestration & Data Layer](#1-the-orchestration--data-layer)
   - [2. Vision & Text Extraction Layer (VLM/LLM)](#2-vision--text-extraction-layer-vlmllm)
   - [3. Deterministic Evidence Engine](#3-deterministic-evidence-engine-decision_enginepy)
   - [4. Experimental Routing & Alternatives Explored](#4-experimental-routing--alternatives-explored)
-- [🚀 Engineering Challenges & Solutions](#-engineering-challenges--solutions)
+- [Engineering Challenges & Solutions](#engineering-challenges--solutions)
   - [1. The Disguised AVIF Problem](#1-the-disguised-avif-problem-400-bad-request)
   - [2. Token Exhaustion](#2-token-exhaustion-402-payment-required)
   - [3. API Rate Limiting](#3-api-rate-limiting-429-too-many-requests)
-- [📊 Evaluation & Benchmarking](#-evaluation--benchmarking)
-- [📂 Repository Structure](#-repository-structure)
-- [💻 Quickstart](#-quickstart)
+- [Evaluation & Benchmarking](#evaluation--benchmarking)
+- [Repository Structure](#repository-structure)
+- [Quickstart](#quickstart)
 
 ---
 
-## 📖 Project Overview & Problem Statement
+## Project Overview & Problem Statement
 
 ### The Business Context
 In the modern insurance and logistics industries, claim processing is a massive operational bottleneck. Agents manually review thousands of claims daily—reading customer chat logs, squinting at poorly lit photos, and manually cross-referencing company policy to verify if the reported damage is real and covered. This manual verification process is slow, expensive, and prone to human error.
@@ -46,9 +46,9 @@ Here is a snapshot of the raw inputs and expected deterministic outputs the pipe
 
 | Domain | Raw User Transcript | Actual Visible Issue | Final Decision | System Justification |
 |---|---|---|---|---|
-| 🚗 **Car** | *"Hi, I found new damage on my car after it was parked outside overnight... The back of the car has a dent now."* | `dent` on `rear_bumper` | `supported` | The image clearly shows a dent on the rear bumper and the user history does not add risk. |
-| 💻 **Laptop** | *"My laptop fell from the table yesterday... the display glass has a crack now."* | `crack` on `screen` | `supported` | The image directly shows a crack on the laptop screen. |
-| 📦 **Package** | *"I received a package that looks water damaged... the outside has a wet-looking stain."* | `water_damage` on `package_side` | `supported` | The image supports the water damage claim, but user history shows prior package claims often needed evidence review. |
+| **Car** | *"Hi, I found new damage on my car after it was parked outside overnight... The back of the car has a dent now."* | `dent` on `rear_bumper` | `supported` | The image clearly shows a dent on the rear bumper and the user history does not add risk. |
+| **Laptop** | *"My laptop fell from the table yesterday... the display glass has a crack now."* | `crack` on `screen` | `supported` | The image directly shows a crack on the laptop screen. |
+| **Package** | *"I received a package that looks water damaged... the outside has a wet-looking stain."* | `water_damage` on `package_side` | `supported` | The image supports the water damage claim, but user history shows prior package claims often needed evidence review. |
 
 ### The Output Specification
 The final system must deterministically output a finalized claim status—`supported`, `contradicted`, or `not_enough_information`—accompanied by a highly structured data row that details the extracted issue type, the affected object part, a severity grading (`low`, `medium`, `high`), and any calculated risk flags for downstream fraud teams.
@@ -68,7 +68,7 @@ When the pipeline finishes processing a claim, it outputs the following strictly
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 To prioritize correctness over raw autonomous agent loops (which are prone to hallucination), we built a strict **3-Tier Pipeline**, while actively iterating through various routing and model strategies to find the optimal balance of speed, cost, and accuracy.
 
@@ -120,7 +120,7 @@ During development, we aggressively tested multiple architectural variations bef
 
 ---
 
-## 🚀 Engineering Challenges & Solutions
+## Engineering Challenges & Solutions
 
 Building a robust, fully automated multimodal pipeline exposed several critical infrastructure hurdles. Here is how we engineered solutions for them:
 
@@ -140,7 +140,7 @@ Building a robust, fully automated multimodal pipeline exposed several critical 
 
 ---
 
-## 📊 Evaluation & Benchmarking
+## Evaluation & Benchmarking
 
 To ensure the pipeline remained deterministic across iterations, we built a custom, automated evaluation harness (`evaluation/main.py`) that continuously scores our generated `output.csv` against a verified ground-truth dataset (`sample_claims.csv`).
 
@@ -155,30 +155,30 @@ To ensure the pipeline remained deterministic across iterations, we built a cust
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 The codebase is strictly organized to separate orchestration, model calling, and business logic:
 
 ```text
-📦 Multi-Modal-Evidence-Review
- ┣ 📂 code/
- ┃ ┣ 📂 evaluation/         # Custom benchmarking and scoring scripts
- ┃ ┣ 📂 prompts/            # Zero-shot Pydantic-enforced prompt templates
- ┃ ┣ 📂 utils/              # Image downscaling, AVIF decoding, and MD5 caching
- ┃ ┣ 📜 main.py             # Main entry point and Pandas orchestration loop
- ┃ ┣ 📜 llm_client.py       # Async Llama-3.1-8b client for text extraction
- ┃ ┣ 📜 vlm_client.py       # Async GPT-4o client for visual damage assessment
- ┃ ┣ 📜 decision_engine.py  # The deterministic business-logic backstop
- ┃ ┣ 📜 risk_engine.py      # User history and fraud-risk cross-referencing
- ┃ ┣ 📜 schemas.py          # Strict Pydantic models for guaranteed JSON outputs
- ┃ ┗ 📜 requirements.txt    # Python dependencies
- ┣ 📂 dataset/              # Input CSVs and raw image sets
- ┗ 📜 output.csv            # The final, generated pipeline output
+Multi-Modal-Evidence-Review/
+ ├── code/
+ │   ├── evaluation/         # Custom benchmarking and scoring scripts
+ │   ├── prompts/            # Zero-shot Pydantic-enforced prompt templates
+ │   ├── utils/              # Image downscaling, AVIF decoding, and MD5 caching
+ │   ├── main.py             # Main entry point and Pandas orchestration loop
+ │   ├── llm_client.py       # Async Llama-3.1-8b client for text extraction
+ │   ├── vlm_client.py       # Async GPT-4o client for visual damage assessment
+ │   ├── decision_engine.py  # The deterministic business-logic backstop
+ │   ├── risk_engine.py      # User history and fraud-risk cross-referencing
+ │   ├── schemas.py          # Strict Pydantic models for guaranteed JSON outputs
+ │   └── requirements.txt    # Python dependencies
+ ├── dataset/                # Input CSVs and raw image sets
+ └── output.csv              # The final, generated pipeline output
 ```
 
 ---
 
-## 💻 Quickstart
+## Quickstart
 
 Follow these steps to run the pipeline locally. 
 
